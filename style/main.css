@@ -1,0 +1,29 @@
+/* Fondo general */
+body {
+    background-color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Botones */
+.stButton button {
+    background-color: #eeeeee;
+    color: rgb(0, 0, 0);
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 0.6em 1.2em;
+    transition: 0.3s;
+}
+.stButton button:hover {
+    background-color: #00ff62;
+}
+
+/* Inputs */
+input, select, textarea {
+    border-radius: 8px !important;
+}
