@@ -3,9 +3,9 @@ streamlit==1.51.0
 pillow==10.4.0
 
 # Google APIs
-google-api-python-client==2.151.0
-google-auth==2.34.0
 google-auth-oauthlib==1.2.1
+google-auth==2.34.0
+google-api-python-client==2.151.0
 google-auth-httplib2==0.2.0
 
 # Google Sheets (vía gspread)
