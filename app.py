@@ -32,7 +32,7 @@ def load_image(path, size=(400, 300)):
 
 banner = load_image("images/banner.jpg", size=(1200, 400))
 if banner:
-    st.image(banner, use_column_width=True)
+    st.image(banner, use_container_width=True)
 
 # ---------------- DATOS DE SERVICIOS ----------------
 SERVICIOS = {
