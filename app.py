@@ -7,9 +7,7 @@ import pytz
 from email.mime.text import MIMEText
 import base64
 from PIL import Image
-import os
 import smtplib
-from email.mime.text import MIMEText
 import json, os
 
 # ---------------- CONFIGURACIÓN GENERAL ----------------
