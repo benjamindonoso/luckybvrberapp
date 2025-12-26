@@ -44,7 +44,7 @@ SERVICIOS = {
 }
 
 # ---------------- CONFIGURACIÓN DE HORARIOS ----------------
-WORK_START, WORK_END, SLOT_MINUTES = 9, 18, 45
+WORK_START, WORK_END, SLOT_MINUTES = 9, 20, 45
 TIMEZONE = "America/Santiago"
 CALENDAR_ID = "lucky.bvrber5@gmail.com"
 SHEET_ID = "1z4E18eS62VUacbIHb2whKzLYTsS5zyYnRNZTqFFiQgc"
