@@ -59,7 +59,10 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.send"
 ]
 
-creds = service_account.Credentials.from_service_account_info(st.secrets["google"], scopes=SCOPES)
+# Cargar credenciales desde variable de entorno (Render)
+creds_info = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+
+creds = service_account.Credentials.from_service_account_info(creds_info,scopes=SCOPES)
 
 calendar_service = build("calendar", "v3", credentials=creds)
 sheets_service = build("sheets", "v4", credentials=creds)
