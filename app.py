@@ -7,7 +7,6 @@ import pytz
 from email.mime.text import MIMEText
 import base64
 from PIL import Image
-import smtplib
 import json, os
 
 # ---------------- CONFIGURACIÓN GENERAL ----------------
@@ -112,19 +111,22 @@ def append_to_sheet(service, data):
 
 
 def send_gmail_message(to, subject, body):
-    gmail_user = "lucky.bvrber5@gmail.com"
-    app_password = "bioz ttiy vput vbkl"
+    message = MIMEText(body, "html")
+    message["to"] = to
+    message["subject"] = subject
 
-    msg = MIMEText(body)
-    msg["From"] = gmail_user
-    msg["To"] = to
-    msg["Subject"] = subject
+    raw_message = base64.urlsafe_b64encode(
+        message.as_bytes()
+    ).decode()
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(gmail_user, app_password)
-            server.sendmail(gmail_user, to, msg.as_string())
+        gmail_service.users().messages().send(
+            userId="me",
+            body={"raw": raw_message}
+        ).execute()
+
         st.success("✅ Correo enviado correctamente.")
+
     except Exception as e:
         st.error(f"Error al enviar correo: {e}")
 
