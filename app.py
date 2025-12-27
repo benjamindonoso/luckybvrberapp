@@ -113,6 +113,7 @@ def append_to_sheet(service, data):
 def send_gmail_message(to, subject, body):
     message = MIMEText(body, "html")
     message["to"] = to
+    message["from"] = "me"
     message["subject"] = subject
 
     raw_message = base64.urlsafe_b64encode(
