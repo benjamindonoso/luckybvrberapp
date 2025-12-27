@@ -35,11 +35,11 @@ if banner:
 
 # ---------------- DATOS DE SERVICIOS ----------------
 SERVICIOS = {
-    "Servicio Clasico": {"desc": "Corte de pelo a gusto, perfilado de cejas y barba, productos para estilizar el cabello." , "precio": "10.000", "imagen": "images/Corte_Clasico.jpg"},
+    "Servicio Clásico": {"desc": "Corte de pelo a gusto, perfilado de cejas y barba, productos para estilizar el cabello." , "precio": "10.000", "imagen": "images/Corte_Clasico.jpg"},
     "Servicio Premium": {"desc": "Incluye limpieza, exfoliación e hidratación + los mismos beneficios que clásico.", "precio": "17.000", "imagen": "images/Corte_Premium.jpg"},
     "Servicio Domicilio": {"desc": "Corte de pelo a gusto en la comodidad de su casa (valor puede variar según distancia)." , "precio": "15.000", "imagen": "images/Corte_Domicilio.jpg"},
-    "Servicio Tintura": {"desc": "Servicio clasico + Tintura deseada, coordinar por DM color y estilo deseado" , "precio": "50.000", "imagen": "images/tintura.jpg"},
-    "Servicio Ondulacion": {"desc": "Servicio clasico + Ondulacion permanente, coordinar por DM estilo deseado" , "precio": "40.000", "imagen": "images/Ondulado_Permanente.jpg"},
+    "Servicio Tintura": {"desc": "Servicio clásico + Tintura deseada, coordinar por DM color y estilo deseado" , "precio": "50.000", "imagen": "images/tintura.jpg"},
+    "Servicio Ondulación": {"desc": "Servicio clásico + Ondulación permanente, coordinar por DM estilo deseado" , "precio": "40.000", "imagen": "images/Ondulado_Permanente.jpg"},
 }
 
 # ---------------- CONFIGURACIÓN DE HORARIOS ----------------
