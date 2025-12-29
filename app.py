@@ -275,15 +275,18 @@ if menu == "Cancelar cita":
 
     st.title("❌ Cancelar cita")
 
-    # Entrada para buscar por correo
-    email_cancel = st.text_input("📧 Ingresa el correo con el que reservaste")
+    email_cancel_input = st.text_input("📧 Ingresa el correo con el que reservaste")
 
-    # Buscar citas
     if st.button("Buscar mis citas"):
-        sheet = sheets_service.spreadsheets().values().get(
-            spreadsheetId=SHEET_ID,
-            range="A:J"
-        ).execute()
+        email_cancel = sanitize_text(email_cancel_input, is_email=True)
+        
+        if not email_cancel:
+            st.error("Ingresa un formato de correo válido.")
+        else:
+            sheet = sheets_service.spreadsheets().values().get(
+                spreadsheetId=SHEET_ID,
+                range="A:J"
+            ).execute()
 
         rows = sheet.get("values", [])[1:]  # sin encabezado
 
