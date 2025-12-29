@@ -4,10 +4,13 @@ from google.oauth2 import service_account
 from googleapiclient.errors import HttpError
 from datetime import datetime, timedelta
 import pytz
+import re
 from email.mime.text import MIMEText
 import base64
 from PIL import Image
 import json, os
+import smtplib
+from email.mime.text import MIMEText
 
 # ---------------- CONFIGURACIÓN GENERAL ----------------
 st.set_page_config(page_title="💈 Lucky Bvrber 🍀", page_icon="💇", layout="wide")
@@ -66,6 +69,24 @@ sheets_service = build("sheets", "v4", credentials=creds)
 gmail_service = build("gmail", "v1", credentials=creds)
 
 # ---------------- FUNCIONES ----------------
+def sanitize_text(text, is_email=False):
+    if not text:
+        return ""
+    # Eliminar etiquetas HTML
+    clean = re.compile('<.*?>')
+    text = re.sub(clean, '', text)
+    
+    if is_email:
+        # Validar formato de email básico
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(email_regex, text):
+            return None
+    else:
+        # Para nombres, permitir solo letras, espacios y algunos acentos
+        text = re.sub(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]', '', text)
+    
+    return text.strip()
+
 def get_day_events(service, fecha):
     start = tz.localize(datetime(fecha.year, fecha.month, fecha.day, 0, 0))
     end = start + timedelta(days=1)
@@ -111,20 +132,18 @@ def append_to_sheet(service, data):
 
 
 def send_gmail_message(to, subject, body):
-    message = MIMEText(body, "html")
-    message["to"] = to
-    message["from"] = "me"
-    message["subject"] = subject
+    gmail_user = os.environ.get("lucky.bvrber5@gmail.com")
+    app_password = os.environ.get("GMAIL_APP_PASS")  # App Password generado en Gmail
 
-    raw_message = base64.urlsafe_b64encode(
-        message.as_bytes()
-    ).decode()
+    msg = MIMEText(body, "html")
+    msg["From"] = gmail_user
+    msg["To"] = to
+    msg["Subject"] = subject
 
     try:
-        gmail_service.users().messages().send(
-            userId="me",
-            body={"raw": raw_message}
-        ).execute()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(gmail_user, app_password)
+            server.sendmail(gmail_user, to, msg.as_string())
 
         st.success("✅ Correo enviado correctamente.")
 
@@ -143,8 +162,8 @@ if menu == "Reservar":
 
     st.title("💈 Reserva tu cita con 𝓛𝓾𝓬𝓴𝔂 𝐵𝓋𝓇𝒷𝑒𝓇 🍀")
 
-    nombre = st.text_input("👤 Nombre completo")
-    email = st.text_input("📧 Correo electrónico")
+    nombre_input = st.text_input("👤 Nombre completo")
+    email_input = st.text_input("📧 Correo electrónico")
     fecha = st.date_input("📅 Fecha de la cita")
 
     if fecha:
@@ -177,12 +196,27 @@ if menu == "Reservar":
         st.session_state["reserva_confirmada"] = False
 
     if st.button("📆 Confirmar reserva") and not st.session_state["reserva_confirmada"]:
-        if not nombre or not email or not fecha or not hora_sel:
-            st.error("Por favor, completa todos los campos.")
+        nombre = sanitize_text(nombre_input)
+        email = sanitize_text(email_input, is_email=True)
+
+        if not nombre or len(nombre) < 3:
+            st.error("Por favor, ingresa un nombre válido (solo letras).")
+
+        elif email is None:
+            st.error("Por favor, ingresa un correo electrónico válido.")
+
+        elif not fecha or not hora_sel:
+            st.error("Por favor, completa todos los campos de fecha y hora.")
+
         else:
             start_str, end_str = hora_sel.split(" - ")
-            start_dt = tz.localize(datetime.combine(fecha, datetime.strptime(start_str, "%H:%M").time()))
-            end_dt = tz.localize(datetime.combine(fecha, datetime.strptime(end_str, "%H:%M").time()))
+            start_dt = tz.localize(
+                datetime.combine(fecha, datetime.strptime(start_str, "%H:%M").time())
+            )
+            end_dt = tz.localize(
+                datetime.combine(fecha, datetime.strptime(end_str, "%H:%M").time())
+            )
+
             precio = SERVICIOS[servicio]["precio"]
 
             if not is_slot_free(start_dt, end_dt, events):
@@ -190,9 +224,21 @@ if menu == "Reservar":
             else:
                 try:
                     title = f"{servicio} — {nombre}"
-                    desc = f"Cliente: {nombre}\nEmail: {email}\nServicio: {servicio}\nPrecio: ${precio}"
+                    desc = (
+                        f"Cliente: {nombre}\n"
+                        f"Email: {email}\n"
+                        f"Servicio: {servicio}\n"
+                        f"Precio: ${precio}"
+                    )
 
-                    event_id = create_calendar_event(calendar_service, start_dt, end_dt, title, desc, email)
+                    event_id = create_calendar_event(
+                        calendar_service,
+                        start_dt,
+                        end_dt,
+                        title,
+                        desc,
+                        email
+                    )
 
                     append_to_sheet(sheets_service, [
                         fecha.strftime("%Y-%m-%d"),
@@ -202,16 +248,19 @@ if menu == "Reservar":
                         servicio,
                         precio,
                         event_id,
-                        "ACTIVA",   # ← NUEVO ESTADO
-                        "",         # fecha_cancelación
-                        ""          # motivo
+                        "ACTIVA",
+                        "",
+                        ""
                     ])
 
                     send_gmail_message(
-                         email,
+                        email,
                         "Confirmación de cita — Lucky Barber",
-                        f"Hola {nombre}, tu cita para {servicio} fue confirmada para el {fecha} a las {start_str}. 💈\nPrecio: ${precio}\n¡Te esperamos!"
+                        f"Hola {nombre}, tu cita para {servicio} fue confirmada "
+                        f"para el {fecha} a las {start_str}. 💈\n"
+                        f"Precio: ${precio}\n¡Te esperamos!"
                     )
+
                     st.success("✅ Cita confirmada y correo enviado.")
                     st.session_state["reserva_confirmada"] = True
 
