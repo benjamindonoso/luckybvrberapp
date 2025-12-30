@@ -69,6 +69,14 @@ sheets_service = build("sheets", "v4", credentials=creds)
 gmail_service = build("gmail", "v1", credentials=creds)
 
 # ---------------- FUNCIONES ----------------
+def get_client_ip():
+    try:
+        ctx = st.runtime.scriptrunner.get_script_run_ctx()
+        headers = ctx.request.headers
+        return headers.get("X-Forwarded-For", "").split(",")[0].strip()
+    except:
+        return "IP_DESCONOCIDA"
+    
 def sanitize_text(text, is_email=False):
     if not text:
         return ""
@@ -130,6 +138,71 @@ def append_to_sheet(service, data):
         body={"values": [data]}
     ).execute()
 
+def has_recent_appointment(service, email, new_start_dt, hours=72):
+    sheet = service.spreadsheets().values().get(
+        spreadsheetId=SHEET_ID,
+        range="A:J"
+    ).execute()
+
+    rows = sheet.get("values", [])[1:]
+    limit = timedelta(hours=hours)
+
+    for r in rows:
+        if len(r) < 8:
+            continue
+
+        fecha, hora, _, correo, _, _, _, estado = r[:8]
+
+        if correo != email or estado != "ACTIVA":
+            continue
+
+        try:
+            cita_dt = tz.localize(
+                datetime.combine(
+                    datetime.strptime(fecha, "%Y-%m-%d").date(),
+                    datetime.strptime(hora.split(" - ")[0], "%H:%M").time()
+                )
+            )
+        except:
+            continue
+
+        if abs(new_start_dt - cita_dt) < limit:
+            return True
+
+    return False
+
+def has_recent_appointment_by_ip(service, ip, new_start_dt, hours=72):
+    sheet = service.spreadsheets().values().get(
+        spreadsheetId=SHEET_ID,
+        range="A:J"
+    ).execute()
+
+    rows = sheet.get("values", [])[1:]
+    limit = timedelta(hours=hours)
+
+    for r in rows:
+        if len(r) < 9:
+            continue
+
+        fecha, hora, _, _, _, _, _, estado, ip_guardada = r[:9]
+
+        if estado != "ACTIVA" or ip_guardada != ip:
+            continue
+
+        try:
+            cita_dt = tz.localize(
+                datetime.combine(
+                    datetime.strptime(fecha, "%Y-%m-%d").date(),
+                    datetime.strptime(hora.split(" - ")[0], "%H:%M").time()
+                )
+            )
+        except:
+            continue
+
+        if abs(new_start_dt - cita_dt) < limit:
+            return True
+
+    return False
 
 def send_gmail_message(to, subject, body):
     gmail_user = os.environ.get("lucky.bvrber5@gmail.com")
@@ -217,10 +290,19 @@ if menu == "Reservar":
                 datetime.combine(fecha, datetime.strptime(end_str, "%H:%M").time())
             )
 
+            client_ip = get_client_ip()
+
             precio = SERVICIOS[servicio]["precio"]
 
             if not is_slot_free(start_dt, end_dt, events):
                 st.error("⛔ Ese horario ya está ocupado.")
+
+            elif has_recent_appointment(sheets_service, email, start_dt):
+                st.error("⛔ Ya tienes una cita agendada dentro de las últimas 72 horas.")
+
+            elif has_recent_appointment_by_ip(sheets_service, client_ip, start_dt):
+                st.error("⛔ Desde esta conexión ya se solicitó una cita en las últimas 72 horas.")
+
             else:
                 try:
                     title = f"{servicio} — {nombre}"
@@ -249,7 +331,7 @@ if menu == "Reservar":
                         precio,
                         event_id,
                         "ACTIVA",
-                        "",
+                        client_ip,
                         ""
                     ])
 
