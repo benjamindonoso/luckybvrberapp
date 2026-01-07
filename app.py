@@ -73,9 +73,16 @@ def get_client_ip():
     try:
         ctx = st.runtime.scriptrunner.get_script_run_ctx()
         headers = ctx.request.headers
-        return headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        
+        ip = headers.get("X-Forwarded-For", "")
+        ip = ip.split(",")[0].strip() if ip else ""
+
+        if not ip or ip == "" or ip == "127.0.0.1":
+            return None
+        
+        return ip
     except:
-        return "IP_DESCONOCIDA"
+        return None
     
 def sanitize_text(text, is_email=False):
     if not text:
@@ -300,7 +307,7 @@ if menu == "Reservar":
             elif has_recent_appointment(sheets_service, email, start_dt):
                 st.error("⛔ Ya tienes una cita agendada dentro de las últimas 72 horas.")
 
-            elif has_recent_appointment_by_ip(sheets_service, client_ip, start_dt):
+            elif client_ip and has_recent_appointment_by_ip(sheets_service, client_ip, start_dt):
                 st.error("⛔ Desde esta conexión ya se solicitó una cita en las últimas 72 horas.")
 
             else:
@@ -331,7 +338,7 @@ if menu == "Reservar":
                         precio,
                         event_id,
                         "ACTIVA",
-                        client_ip,
+                        client_ip if client_ip else "",
                         ""
                     ])
 
