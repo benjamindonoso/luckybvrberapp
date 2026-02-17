@@ -231,6 +231,20 @@ def send_gmail_message(to, subject, body):
     except Exception as e:
         st.error(f"Error al enviar correo: {e}")
 
+def autoplay_audio():
+    with open("Cancion.mp3", "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+
+    md = f"""
+        <audio autoplay loop>
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+        </audio>
+        <script>
+            document.querySelector("audio").volume = 0.4;
+        </script>
+    """
+    components.html(md, height=0)
 
 # ---------------- MENÚ LATERAL ----------------
 menu = st.sidebar.radio("Menú", ["Reservar", "Cancelar cita"])
@@ -246,20 +260,11 @@ if menu == "Reservar":
     if "music_loaded" not in st.session_state:
         st.session_state.music_loaded = False
 
-    if st.button("Activar música 🎵") and not st.session_state.music_loaded:
+    if st.button("Activar música 🎵"):
         st.session_state.music_loaded = True
 
     if st.session_state.music_loaded:
-        components.html("""
-            <audio id="bgmusic" autoplay loop>
-                <source src="Cancion.mp3" type="audio/mp3">
-            </audio>
-
-            <script>
-                const audio = document.getElementById("bgmusic");
-                audio.volume = 0.2;
-            </script>
-        """, height=0)
+        autoplay_audio()
 
     nombre_input = st.text_input("👤 Nombre completo")
     email_input = st.text_input("📧 Correo electrónico")
