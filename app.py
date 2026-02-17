@@ -242,6 +242,19 @@ if menu == "Reservar":
 
     st.title("💈 Reserva tu cita con 𝓛𝓾𝓬𝓴𝔂 𝐵𝓋𝓇𝒷𝑒𝓇 🍀")
 
+    if "music_on" not in st.session_state:
+        st.session_state.music_on = False
+
+    if st.button("Activar música 🎵"):
+        st.session_state.music_on = True
+
+    if st.session_state.music_on:
+        st.markdown("""
+        <audio autoplay loop>
+        <source src="Cancion.mp3" type="audio/mp3">
+        </audio>
+        """, unsafe_allow_html=True)
+
     nombre_input = st.text_input("👤 Nombre completo")
     email_input = st.text_input("📧 Correo electrónico")
     fecha = st.date_input("📅 Fecha de la cita")
@@ -357,7 +370,9 @@ if menu == "Reservar":
                     st.error(f"Error en Google API: {e}")
 
     st.text("Sigueme en mis redes sociales")
-    st.link_button("Ir a mis instagram" , url="https://www.instagram.com/lucky.bvrber_/")
+    st.link_button("Ir a mi instagram" , url="https://www.instagram.com/lucky.bvrber_/")
+    st.link_button("Ir a mi TikTok" , url="https://www.tiktok.com/@_.youngblessing")
+
 
 
 # =======================================================
