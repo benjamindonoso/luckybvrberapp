@@ -36,3 +36,10 @@ input, select, textarea {
     padding: 0.6em 1.2em;
     transition: 0.3s;
 }
+
+.staudio {
+    background-color: #eeeeee;
+    color: rgb(0, 0, 0);
+    padding: 0.6em 1.2em;
+    transition: 0.3s;
+}
