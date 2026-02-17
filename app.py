@@ -266,6 +266,8 @@ if menu == "Reservar":
     if st.session_state.music_loaded:
         autoplay_audio()
 
+    st.audio("Cancion.mp3")
+
     nombre_input = st.text_input("👤 Nombre completo")
     email_input = st.text_input("📧 Correo electrónico")
     fecha = st.date_input("📅 Fecha de la cita")
