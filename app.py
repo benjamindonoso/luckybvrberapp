@@ -350,11 +350,14 @@ if menu == "Reservar":
                         f"Precio: ${precio}\n¡Te esperamos!"
                     )
 
-                    st.success("✅ Cita confirmada y correo enviado.")
+                    st.success("✅ Cita confirmada, gracias por su confianza.")
                     st.session_state["reserva_confirmada"] = True
 
                 except HttpError as e:
                     st.error(f"Error en Google API: {e}")
+
+    st.text("Sigueme en mis redes sociales")
+    st.link_button("Ir a mis instagram" , url="https://www.instagram.com/lucky.bvrber_/")
 
 
 # =======================================================
