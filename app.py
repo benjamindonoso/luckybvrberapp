@@ -11,6 +11,7 @@ from PIL import Image
 import json, os
 import smtplib
 from email.mime.text import MIMEText
+import streamlit.components.v1 as components
 
 # ---------------- CONFIGURACIÓN GENERAL ----------------
 st.set_page_config(page_title="💈 Lucky Bvrber 🍀", page_icon="💇", layout="wide")
@@ -242,22 +243,23 @@ if menu == "Reservar":
 
     st.title("💈 Reserva tu cita con 𝓛𝓾𝓬𝓴𝔂 𝐵𝓋𝓇𝒷𝑒𝓇 🍀")
 
-    st.title("Prueba Audio")
+    if "music_loaded" not in st.session_state:
+        st.session_state.music_loaded = False
 
-    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+    if st.button("Activar música 🎵") and not st.session_state.music_loaded:
+        st.session_state.music_loaded = True
 
-    if "music_on" not in st.session_state:
-        st.session_state.music_on = False
+    if st.session_state.music_loaded:
+        components.html("""
+            <audio id="bgmusic" autoplay loop>
+                <source src="Cancion.mp3" type="audio/mp3">
+            </audio>
 
-    if st.button("Activar música 🎵"):
-        st.session_state.music_on = True
-
-    if st.session_state.music_on:
-        st.markdown("""
-        <audio autoplay loop>
-        <source src="Cancion.mp3" type="audio/mp3">
-        </audio>
-        """, unsafe_allow_html=True)
+            <script>
+                const audio = document.getElementById("bgmusic");
+                audio.volume = 0.2;
+            </script>
+        """, height=0)
 
     nombre_input = st.text_input("👤 Nombre completo")
     email_input = st.text_input("📧 Correo electrónico")
