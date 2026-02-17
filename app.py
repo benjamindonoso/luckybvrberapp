@@ -242,6 +242,10 @@ if menu == "Reservar":
 
     st.title("💈 Reserva tu cita con 𝓛𝓾𝓬𝓴𝔂 𝐵𝓋𝓇𝒷𝑒𝓇 🍀")
 
+    st.title("Prueba Audio")
+
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+
     if "music_on" not in st.session_state:
         st.session_state.music_on = False
 
