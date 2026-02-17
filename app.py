@@ -257,15 +257,6 @@ if menu == "Reservar":
 
     st.title("💈 Reserva tu cita con 𝓛𝓾𝓬𝓴𝔂 𝐵𝓋𝓇𝒷𝑒𝓇 🍀")
 
-    if "music_loaded" not in st.session_state:
-        st.session_state.music_loaded = False
-
-    if st.button("Activar música 🎵"):
-        st.session_state.music_loaded = True
-
-    if st.session_state.music_loaded:
-        autoplay_audio()
-
     st.audio("Cancion.mp3")
 
     nombre_input = st.text_input("👤 Nombre completo")
